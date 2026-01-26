@@ -46,7 +46,7 @@ The analysis uses microdata from the **Global Findex Database 2025** provided by
 ### Installation
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/ProfFausat/Financial-Inclusion-Project
     cd v2_production/notebooks
     ```
 2.  **Install dependencies:**
