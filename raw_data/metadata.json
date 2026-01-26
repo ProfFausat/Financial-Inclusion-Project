@@ -1,0 +1,9 @@
+{
+    "dataset_name": "Global Findex Database 2025",
+    "source_url": "https://microdata.worldbank.org/catalog/7860/download/351890",
+    "downloaded_at": "2026-01-24T14:59:57.795380Z",
+    "file_name": "GlobalFindexDatabase2025.zip",
+    "file_size_bytes": 8599960,
+    "checksum_algorithm": "SHA256",
+    "checksum": "4c5720053c72189431c0ca255bea3cf4ec0beed214360ca32102ad61f58a4f8c"
+}
