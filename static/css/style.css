@@ -1,7 +1,10 @@
 :root {
-    --primary: #00bcd4; /* Cyan */
-    --secondary: #2196f3; /* Blue */
-    --accent: #ffc107; /* Gold/Amber */
+    --primary: #00bcd4;
+    /* Cyan */
+    --secondary: #2196f3;
+    /* Blue */
+    --accent: #ffc107;
+    /* Gold/Amber */
     --bg-dark: #0f172a;
     --glass: rgba(255, 255, 255, 0.1);
     --glass-blur: blur(15px);
@@ -54,6 +57,7 @@ header {
     letter-spacing: 2px;
     background: linear-gradient(to right, var(--primary), var(--secondary));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -91,6 +95,7 @@ h1 {
     margin-bottom: 1rem;
     background: linear-gradient(to right, #fff, #94a3b8);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -98,6 +103,21 @@ p {
     color: var(--text-dim);
     margin-bottom: 2.5rem;
     line-height: 1.6;
+}
+
+.download-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    font-size: 0.85rem;
+    border-bottom: 1px dashed var(--primary);
+    transition: all 0.3s ease;
+}
+
+.download-link:hover {
+    color: white;
+    border-bottom-color: white;
 }
 
 .form-grid {
@@ -121,7 +141,8 @@ label {
     letter-spacing: 0.5px;
 }
 
-input, select {
+input,
+select {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
@@ -132,28 +153,11 @@ input, select {
     transition: all 0.3s ease;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
     outline: none;
     border-color: var(--primary);
     background: rgba(0, 0, 0, 0.4);
-}
-
-.checkbox-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin: 2rem 0;
-}
-
-.switch-label {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.95rem;
-    cursor: pointer;
-    color: var(--text-main);
-    text-transform: none;
-    letter-spacing: 0;
 }
 
 .btn-primary {
@@ -184,8 +188,15 @@ input:focus, select:focus {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .result-badge {
@@ -261,7 +272,7 @@ input:focus, select:focus {
 }
 
 .btn-secondary {
-     width: 100%;
+    width: 100%;
     background: transparent;
     border: 1px solid var(--primary);
     color: var(--primary);
@@ -283,8 +294,176 @@ input:focus, select:focus {
     color: var(--text-dim);
 }
 
-.hidden { display: none; }
+.batch-report {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.5s ease;
+}
+
+.report-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.summary-card .label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.summary-card .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.banked-color {
+    color: #00ff7f;
+}
+
+.unbanked-color {
+    color: var(--accent);
+}
+
+.chart-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+}
+
+#downloadReportBtn {
+    margin-top: 1rem;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Model Insights Styles */
+.insights-toggle {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.insights-btn {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(139, 92, 246, 0.2));
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    color: var(--text-main);
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.insights-btn:hover {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(139, 92, 246, 0.3));
+    transform: translateY(-2px);
+}
+
+.model-insights {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.5s ease;
+}
+
+.model-insights h3 {
+    color: var(--text-main);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.metric-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.feature-importance {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.explanation {
+    background: rgba(0, 0, 0, 0.15);
+    border-left: 3px solid var(--primary);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.explanation p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    color: var(--text-main);
+}
+
+.explanation p:last-child {
+    margin-bottom: 0;
+}
+
+.explanation strong {
+    color: var(--primary);
+}
 
 @media (max-width: 900px) {
-    .container { grid-template-columns: 1fr; }
+    .container {
+        grid-template-columns: 1fr;
+    }
 }

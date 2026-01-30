@@ -168,5 +168,44 @@ def predict():
         print(f"Prediction Error:\n{error_msg}")
         return jsonify({'error': str(e), 'traceback': error_msg}), 400
 
+@app.route('/batch_predict', methods=['POST'])
+def batch_predict():
+    if model is None:
+        return jsonify({'error': 'Model not loaded'}), 500
+    
+    try:
+        file = request.files.get('file')
+        if not file:
+            return jsonify({'error': 'No file uploaded'}), 400
+        
+        df_batch = pd.read_csv(file)
+        
+        results = []
+        for _, row in df_batch.iterrows():
+            # Convert row to dict for preprocessor
+            row_dict = row.to_dict()
+            processed_data = preprocess_input(row_dict)
+            
+            proba = model.predict_proba(processed_data)[0]
+            unbanked_prob = proba[0]
+            banked_prob = proba[1]
+            prediction = 0 if unbanked_prob > banked_prob else 1
+            
+            res_row = row_dict.copy()
+            res_row['unbanked_probability'] = round(float(unbanked_prob), 4)
+            res_row['banked_probability'] = round(float(banked_prob), 4)
+            res_row['prediction'] = int(prediction)
+            res_row['status'] = 'Unbanked' if prediction == 0 else 'Banked'
+            results.append(res_row)
+        
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/download_sample')
+def download_sample():
+    from flask import send_from_directory
+    return send_from_directory('static', 'sample_batch.csv', as_attachment=True)
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

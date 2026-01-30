@@ -1,0 +1,6 @@
+world_bank_region,age_years,income_quintile,education_level,mobile_use_frequency,is_female,is_rural,is_employed,has_a_mobile_phone,has_smartphone,used_internet_recently,has_national_id,has_saved,has_borrowed
+Sub-Saharan Africa,25,2,1,2,1,1,1,1,0,0,1,0,0
+Europe & Central Asia,45,4,2,4,0,0,1,1,1,1,1,1,0
+South Asia,30,3,2,1,1,1,0,1,0,0,1,0,1
+Latin America & Caribbean,22,5,3,4,0,0,1,1,1,1,1,1,1
+Middle East & North Africa,50,1,1,0,1,1,0,0,0,0,1,0,0
