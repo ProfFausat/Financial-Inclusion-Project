@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Inclusion - AI Targeting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="overlay"></div>
+
+    <header>
+        <div class="logo">Created by Fausat Ibrahim | Independent Data Scientist</div>
+        <div class="branding"></div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="glass-card main-form">
+                <h1>Financial Inclusion Predictor</h1>
+                <p>Identify unbanked individuals likely to open an account using advanced SVM targeting.</p>
+
+                <form id="predictionForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="world_bank_region">Region</label>
+                            <select name="world_bank_region" id="world_bank_region" required>
+                                <option value="Sub-Saharan Africa">Sub-Saharan Africa</option>
+                                <option value="South Asia">South Asia</option>
+                                <option value="East Asia & Pacific">East Asia & Pacific</option>
+                                <option value="Latin America & Caribbean">Latin America & Caribbean</option>
+                                <option value="Middle East & North Africa">Middle East & North Africa</option>
+                                <option value="Europe & Central Asia">Europe & Central Asia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="age_years">Age</label>
+                            <input type="number" name="age_years" id="age_years" placeholder="25" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="income_quintile">Income Quintile (1-5)</label>
+                            <input type="number" name="income_quintile" id="income_quintile" min="1" max="5" value="3"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="education_level">Education Level (1-3)</label>
+                            <select name="education_level" id="education_level" required>
+                                <option value="1">Primary or less</option>
+                                <option value="2">Secondary</option>
+                                <option value="3">Tertiary</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile_use_frequency">Mobile Use Frequency (0-4)</label>
+                            <select name="mobile_use_frequency" id="mobile_use_frequency">
+                                <option value="4">Daily</option>
+                                <option value="3">Weekly</option>
+                                <option value="2">Monthly</option>
+                                <option value="1">Less than once a month</option>
+                                <option value="0">Never</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="is_female">Gender</label>
+                            <select name="is_female" id="is_female">
+                                <option value="1">Female</option>
+                                <option value="0">Male</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="is_rural">Residence</label>
+                            <select name="is_rural" id="is_rural">
+                                <option value="1">Rural</option>
+                                <option value="0">Urban</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="switch-label"><input type="checkbox" name="is_employed" value="1" checked>
+                            Employed</label>
+                        <label class="switch-label"><input type="checkbox" name="has_a_mobile_phone" value="1" checked>
+                            Has Mobile Phone</label>
+                        <label class="switch-label"><input type="checkbox" name="has_smartphone" value="1" checked> Has
+                            Smartphone</label>
+                        <label class="switch-label"><input type="checkbox" name="used_internet_recently" value="1"> Used
+                            Internet Recently</label>
+                        <label class="switch-label"><input type="checkbox" name="has_national_id" value="1" checked> Has
+                            National ID</label>
+                        <label class="switch-label"><input type="checkbox" name="has_saved" value="1"> Has
+                            Savings</label>
+                        <label class="switch-label"><input type="checkbox" name="has_borrowed" value="1"> Has
+                            Borrowed</label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Generate Analysis</button>
+                </form>
+
+                <div id="predictionResult" class="result-area hidden">
+                    <div class="result-badge" id="statusBadge"></div>
+                    <div class="probability-container">
+                        <div class="prob-box">
+                            <span class="label">Unbanked Probability</span>
+                            <span class="value" id="unbankedProb">0%</span>
+                        </div>
+                        <div class="prob-box">
+                            <span class="label">Banked Probability</span>
+                            <span class="value" id="bankedProb">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card batch-section">
+                <h2>Batch Processing</h2>
+                <p>Upload a CSV file for mass targeting.</p>
+                <form id="batchForm" enctype="multipart/form-data">
+                    <div class="file-upload">
+                        <input type="file" name="file" id="csvFile" accept=".csv" required>
+                        <label for="csvFile">Choose CSV File</label>
+                    </div>
+                    <button type="submit" class="btn-secondary">Run Batch Prediction</button>
+                </form>
+                <div id="batchStatus" class="batch-status"></div>
+                <div id="batchResults" class="batch-results hidden"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            const checkboxes = e.target.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (!formData.has(cb.name)) {
+                    formData.append(cb.name, "0");
+                }
+            });
+
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || `Server returned ${res.status}`);
+                }
+
+                const resultDiv = document.getElementById('predictionResult');
+                const badge = document.getElementById('statusBadge');
+                const unbankedEl = document.getElementById('unbankedProb');
+                const bankedEl = document.getElementById('bankedProb');
+
+                resultDiv.classList.remove('hidden');
+                badge.innerText = data.status;
+                badge.className = 'result-badge ' + data.status.toLowerCase();
+                unbankedEl.innerText = (data.unbanked_probability * 100).toFixed(2) + '%';
+                bankedEl.innerText = (data.banked_probability * 100).toFixed(2) + '%';
+
+                resultDiv.scrollIntoView({ behavior: 'smooth' });
+            } catch (err) {
+                console.error('Prediction error:', err);
+                alert('Analysis failed: ' + err.message);
+            }
+        });
+
+        document.getElementById('batchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('batchStatus');
+            statusDiv.innerText = 'Processing batch file...';
+
+            const formData = new FormData(e.target);
+            const res = await fetch('/batch_predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                statusDiv.innerText = `Successfully processed ${data.length} records.`;
+            } else {
+                const err = await res.json();
+                statusDiv.innerText = 'Error: ' + (err.error || 'Unknown error');
+            }
+        });
+    </script>
+</body>
+
+</html>
