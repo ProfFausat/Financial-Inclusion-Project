@@ -33,36 +33,52 @@
                     <h3>Model Performance</h3>
                     <div class="metrics-grid">
                         <div class="metric-card">
-                            <span class="metric-label">Accuracy</span>
-                            <span class="metric-value">82.3%</span>
+                            <span class="metric-label">ROC-AUC</span>
+                            <span class="metric-value" id="aucMetric">Loading...</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Precision</span>
-                            <span class="metric-value">79.1%</span>
+                            <span class="metric-label">Recall (Unbanked)</span>
+                            <span class="metric-value" id="recallMetric">Loading...</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-label">Recall</span>
-                            <span class="metric-value">75.8%</span>
+                            <span class="metric-label">Precision (Unbanked)</span>
+                            <span class="metric-value" id="precisionMetric">Loading...</span>
                         </div>
                     </div>
 
                     <h3>Top 5 Important Features</h3>
-                    <div class="feature-importance">
+                    <div class="feature-importance" style="height: 400px; position: relative; margin-bottom: 2rem;">
                         <canvas id="featureChart"></canvas>
                     </div>
 
-                    <h3>How It Works</h3>
+                    <h3>Project Details</h3>
                     <div class="explanation">
-                        <p><strong>Model Type:</strong> Linear Support Vector Machine (SVM) with Stochastic Gradient
-                            Descent</p>
-                        <p><strong>Training Data:</strong> The model was trained on survey data from multiple African
-                            countries, analyzing demographic, economic, and technology usage patterns.</p>
-                        <p><strong>Input Features:</strong> 17 socioeconomic indicators are collected and transformed
-                            into 22 features through scaling, encoding, and missing value indicators.</p>
-                        <p><strong>Prediction Process:</strong> The model analyzes these features to calculate the
-                            probability that an unbanked individual will open a bank account, helping target financial
-                            inclusion efforts effectively.</p>
+                        <ul>
+                            <li style="margin-bottom:12px;">
+                                This application uses a calibrated Linear Support Vector Machine (SVM) to support
+                                precision targeting for financial inclusion outreach.
+                            </li>
+                            <li style="margin-bottom:12px;">
+                                The model was trained on Global Findex 2025 microdata and learns from 17 leakage-safe
+                                socioeconomic indicators, transformed into 22 features through encoding and explicit
+                                missing-data signals.
+                            </li>
+                            <li style="margin-bottom:12px;">
+                                It outputs a probability-based risk score that predicts individuals’ likelihood of being
+                                banked or unbanked.
+                            </li>
+                            <li style="margin-bottom:12px;">
+                                Model behavior is validated using permutation importance and partial dependence
+                                analysis, ensuring predictions are driven by meaningful socioeconomic signals rather
+                                than circular or outcome-adjacent features. The top 5 features are displayed above.
+                            </li>
+                            <li style="margin-bottom:12px;">
+                                The system is deployed as a production-ready Flask API, enabling real-time scoring
+                                of new data for efficient, ROI-aware financial inclusion programs.
+                            </li>
+                        </ul>
                     </div>
+
                 </div>
 
                 <form id="predictionForm">
@@ -105,6 +121,7 @@
                                 <option value="0">Never</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label for="is_female">Gender</label>
                             <select name="is_female" id="is_female">
@@ -140,6 +157,7 @@
                                 <option value="0">No</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label for="used_internet_recently">Used Internet (Last 7 days)?</label>
                             <select name="used_internet_recently" id="used_internet_recently">
@@ -168,6 +186,8 @@
                                 <option value="0" selected>No</option>
                             </select>
                         </div>
+
+
                     </div>
 
 
@@ -240,25 +260,71 @@
             if (panel.classList.contains('hidden')) {
                 panel.classList.remove('hidden');
                 btn.innerText = '📊 Hide Model Insights';
-                if (!featureChart) {
-                    initializeFeatureChart();
-                }
+
+                // Fetch insights if not already loaded or every time?
+                // Fetching every time ensures consistency with backend
+                fetchModelInsights();
+
             } else {
                 panel.classList.add('hidden');
                 btn.innerText = '📊 View Model Insights';
             }
         });
 
+        async function fetchModelInsights() {
+            try {
+                const res = await fetch('/insights');
+                if (!res.ok) throw new Error('Failed to load insights');
+                const data = await res.json();
+
+                // Update metrics
+                document.getElementById('aucMetric').innerText = data.metrics.roc_auc || 'N/A';
+                document.getElementById('recallMetric').innerText = data.metrics.recall || 'N/A';
+                document.getElementById('precisionMetric').innerText = data.metrics.precision || 'N/A';
+
+                // Update Feature Importance Chart
+                if (data.feature_importance) {
+                    updateFeatureChartData(data.feature_importance);
+                }
+
+            } catch (err) {
+                console.error("Error loading insights:", err);
+                // Fallback or leave as Loading...
+            }
+        }
+
+        function updateFeatureChartData(features) {
+            const labels = features.map(f => f.feature);
+            const values = features.map(f => Math.abs(f.importance)); // Use magnitude for scale
+            const displayLabels = features.map(f => f.label || (Math.abs(f.importance) * 100).toFixed(1) + '%');
+
+            if (featureChart) {
+                featureChart.data.labels = labels;
+                featureChart.data.datasets[0].data = values;
+                featureChart.data.datasets[0].displayLabels = displayLabels;
+                featureChart.update();
+            } else {
+                initializeFeatureChart(labels, values, displayLabels);
+            }
+        }
+
         // Initialize Feature Importance Chart
-        function initializeFeatureChart() {
+        function initializeFeatureChart(labels, data, displayLabels) {
             const ctx = document.getElementById('featureChart').getContext('2d');
+
+            // Default placeholder data if not provided
+            if (!labels) labels = ['Loading...'];
+            if (!data) data = [0];
+            if (!displayLabels) displayLabels = data.map(v => (v * 100).toFixed(1) + '%');
+
             featureChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Region', 'Age', 'Education Level', 'Income Quintile', 'Mobile Phone'],
+                    labels: labels,
                     datasets: [{
-                        label: 'Feature Importance',
-                        data: [0.28, 0.19, 0.16, 0.14, 0.12],
+                        label: 'Relative Importance (%)',
+                        data: data,
+                        displayLabels: displayLabels,
                         backgroundColor: [
                             'rgba(124, 58, 237, 0.7)',
                             'rgba(139, 92, 246, 0.7)',
@@ -279,10 +345,16 @@
                 options: {
                     indexAxis: 'y',
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false, // Allow filling container
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.dataset.displayLabels[context.dataIndex];
+                                    return context.parsed.x.toFixed(2) + ' (Actual: ' + label + ')';
+                                }
+                            },
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             titleColor: '#f8fafc',
                             bodyColor: '#f8fafc',
@@ -291,19 +363,44 @@
                             padding: 12
                         }
                     },
+                    layout: {
+                        padding: {
+                            right: 50 // Space for labels
+                        }
+                    },
                     scales: {
                         x: {
                             beginAtZero: true,
-                            max: 0.3,
-                            ticks: { color: '#94a3b8' },
+                            max: 1.0, // Scaled for Relative Importance (100%)
+                            ticks: { display: false }, // Hide x-axis labels
                             grid: { color: 'rgba(148, 163, 184, 0.1)' }
                         },
                         y: {
-                            ticks: { color: '#f8fafc', font: { size: 11 } },
+                            ticks: {
+                                color: '#f8fafc',
+                                font: { size: 14, weight: 'bold' } // Increased font size
+                            },
                             grid: { display: false }
                         }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'customLabels',
+                    afterDatasetsDraw(chart, args, options) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            const meta = chart.getDatasetMeta(i);
+                            meta.data.forEach((bar, index) => {
+                                const percentage = dataset.displayLabels[index];
+                                ctx.font = 'bold 12px Outfit';
+                                ctx.fillStyle = '#f8fafc';
+                                ctx.textAlign = 'left';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(percentage, bar.x + 8, bar.y);
+                            });
+                        });
+                    }
+                }]
             });
         }
 
