@@ -1,6 +1,6 @@
 import os
 import joblib
-import pandas as pd
+import csv
 import numpy as np
 from flask import Flask, request, jsonify, render_template
 from sklearn.preprocessing import FunctionTransformer
@@ -149,12 +149,13 @@ def batch_predict():
         if not file:
             return jsonify({'error': 'No file uploaded'}), 400
         
-        df_batch = pd.read_csv(file)
+        # Read CSV file using standard csv module
+        stream = file.stream.read().decode('utf-8').splitlines()
+        reader = csv.DictReader(stream)
         
         results = []
-        for _, row in df_batch.iterrows():
-            # Convert row to dict for preprocessor
-            row_dict = row.to_dict()
+        for row_dict in reader:
+            # Preprocess the dictionary directly
             processed_data = preprocess_input(row_dict)
             
             proba = model.predict_proba(processed_data)[0]

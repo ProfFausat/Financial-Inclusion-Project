@@ -1,0 +1,17 @@
+# Exclude large datasets and notebooks
+raw_data/
+Financial_Inclusion_Project_v2.ipynb
+.ipynb_checkpoints/
+
+# Exclude local environment and caches
+venv/
+__pycache__/
+.git/
+.gemini/
+
+# Exclude test files
+test_insights.py
+
+# Exclude unneeded system files
+.DS_Store
+Thumbs.db
