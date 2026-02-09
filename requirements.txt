@@ -1,6 +1,3 @@
-
-# Added Flask as it's the core web framework
-Flask==3.0.0
 joblib==1.5.3
 numpy>=1.26.0
 pandas==2.3.3
